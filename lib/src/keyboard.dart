@@ -17,6 +17,10 @@ class VirtualKeyboard extends StatefulWidget {
   /// Virtual keyboard height. Default is 300
   final double height;
 
+  final double? keyPadding;
+
+  final Color? keyBackgroundColor;
+
   /// Virtual keyboard height. Default is full screen width
   final double? width;
 
@@ -58,7 +62,9 @@ class VirtualKeyboard extends StatefulWidget {
       this.height = _virtualKeyboardDefaultHeight,
       this.textColor = Colors.black,
       this.fontSize = 14,
-      this.alwaysCaps = false})
+      this.alwaysCaps = false,
+      this.keyPadding,
+      this.keyBackgroundColor,})
       : super(key: key);
 
   @override
@@ -72,6 +78,7 @@ class _VirtualKeyboardState extends State<VirtualKeyboard> {
   late VirtualKeyboardType type;
   Function? onKeyPress;
   late TextEditingController textController;
+
   // The builder function will be called for each Key object.
   Widget Function(BuildContext context, VirtualKeyboardKey key)? builder;
   late double height;
@@ -81,6 +88,7 @@ class _VirtualKeyboardState extends State<VirtualKeyboard> {
   late bool alwaysCaps;
   late bool reverseLayout;
   late VirtualKeyboardLayoutKeys customLayoutKeys;
+
   // Text Style for keys.
   late TextStyle textStyle;
 
@@ -258,20 +266,34 @@ class _VirtualKeyboardState extends State<VirtualKeyboard> {
 
   /// Creates default UI element for keyboard Key.
   Widget _keyboardDefaultKey(VirtualKeyboardKey key) {
+    final itemHeight = height / customLayoutKeys.activeLayout.length;
+    final radius = itemHeight / 2;
+    final color = widget.keyBackgroundColor ?? Color(0xFF454444);
     return Expanded(
+        child: Padding(
+      padding: EdgeInsets.all(widget.keyPadding ?? 5.0),
+      child: Material(
+        color: color,
+        borderRadius: BorderRadius.all(Radius.circular(radius)),
         child: InkWell(
-      onTap: () {
-        _onKeyPress(key);
-      },
-      child: Container(
-        height: height / customLayoutKeys.activeLayout.length,
-        child: Center(
-            child: Text(
-          alwaysCaps
-              ? key.capsText ?? ''
-              : (isShiftEnabled ? key.capsText : key.text) ?? '',
-          style: textStyle,
-        )),
+          splashColor: textStyle.color?.withOpacity(0.2),
+          highlightColor: textStyle.color?.withOpacity(0.2),
+          //highlightColor: Color(0xFF8E8E8E),
+          borderRadius: BorderRadius.all(Radius.circular(radius)),
+          onTap: () {
+            _onKeyPress(key);
+          },
+          child: SizedBox(
+            height: itemHeight,
+            child: Center(
+                child: Text(
+              alwaysCaps
+                  ? key.capsText ?? ''
+                  : (isShiftEnabled ? key.capsText : key.text) ?? '',
+              style: textStyle,
+            )),
+          ),
+        ),
       ),
     ));
   }
@@ -342,22 +364,35 @@ class _VirtualKeyboardState extends State<VirtualKeyboard> {
         break;
     }
 
-    var wdgt = InkWell(
-      onTap: () {
-        if (key.action == VirtualKeyboardKeyAction.Shift) {
-          if (!alwaysCaps) {
-            setState(() {
-              isShiftEnabled = !isShiftEnabled;
-            });
-          }
-        }
-
-        _onKeyPress(key);
-      },
-      child: Container(
-        alignment: Alignment.center,
-        height: height / customLayoutKeys.activeLayout.length,
-        child: actionKey,
+    final itemHeight = height / customLayoutKeys.activeLayout.length;
+    final radius = itemHeight / 2;
+    final color = widget.keyBackgroundColor ?? Color(0xFF454444);
+    var wdgt = Padding(
+      padding: EdgeInsets.all(widget.keyPadding ?? 5.0),
+      child: Material(
+        color: color,
+        borderRadius: BorderRadius.all(Radius.circular(radius)),
+        child: InkWell(
+          borderRadius: BorderRadius.all(Radius.circular(radius)),
+          splashColor: textStyle.color?.withOpacity(0.2),
+          highlightColor: textStyle.color?.withOpacity(0.2),
+          //highlightColor: Color(0xFF8E8E8E),
+          onTap: () {
+            if (key.action == VirtualKeyboardKeyAction.Shift) {
+              if (!alwaysCaps) {
+                setState(() {
+                  isShiftEnabled = !isShiftEnabled;
+                });
+              }
+            }
+            _onKeyPress(key);
+          },
+          child: Container(
+            alignment: Alignment.center,
+            height: itemHeight,
+            child: actionKey,
+          ),
+        ),
       ),
     );
 
