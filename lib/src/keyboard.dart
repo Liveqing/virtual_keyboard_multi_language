@@ -49,23 +49,23 @@ class VirtualKeyboard extends StatefulWidget {
   /// will be ignored if customLayoutKeys is not null
   final List<VirtualKeyboardDefaultLayouts>? defaultLayouts;
 
-  VirtualKeyboard(
-      {Key? key,
-      required this.type,
-      this.onKeyPress,
-      this.builder,
-      this.width,
-      this.defaultLayouts,
-      this.customLayoutKeys,
-      this.textController,
-      this.reverseLayout = false,
-      this.height = _virtualKeyboardDefaultHeight,
-      this.textColor = Colors.black,
-      this.fontSize = 14,
-      this.alwaysCaps = false,
-      this.keyPadding,
-      this.keyBackgroundColor,})
-      : super(key: key);
+  VirtualKeyboard({
+    Key? key,
+    required this.type,
+    this.onKeyPress,
+    this.builder,
+    this.width,
+    this.defaultLayouts,
+    this.customLayoutKeys,
+    this.textController,
+    this.reverseLayout = false,
+    this.height = _virtualKeyboardDefaultHeight,
+    this.textColor = Colors.black,
+    this.fontSize = 14,
+    this.alwaysCaps = false,
+    this.keyPadding,
+    this.keyBackgroundColor,
+  }) : super(key: key);
 
   @override
   State<StatefulWidget> createState() {
@@ -176,7 +176,11 @@ class _VirtualKeyboardState extends State<VirtualKeyboard> {
 
   @override
   Widget build(BuildContext context) {
-    return type == VirtualKeyboardType.Numeric ? _numeric() : _alphanumeric();
+    return type == VirtualKeyboardType.Numeric
+        ? _numeric()
+        : type == VirtualKeyboardType.NumericPsw
+            ? _numericPsw()
+            : _alphanumeric();
   }
 
   Widget _alphanumeric() {
@@ -203,12 +207,26 @@ class _VirtualKeyboardState extends State<VirtualKeyboard> {
     );
   }
 
+  Widget _numericPsw() {
+    return Container(
+      height: height,
+      width: width ?? MediaQuery.of(context).size.width,
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        crossAxisAlignment: CrossAxisAlignment.center,
+        children: _rows(),
+      ),
+    );
+  }
+
   /// Returns the rows for keyboard.
   List<Widget> _rows() {
     // Get the keyboard Rows
     List<List<VirtualKeyboardKey>> keyboardRows =
         type == VirtualKeyboardType.Numeric
             ? _getKeyboardRowsNumeric()
+            : type == VirtualKeyboardType.NumericPsw
+            ? _getKeyboardRowsNumericPsw()
             : _getKeyboardRows(customLayoutKeys);
 
     // Generate keyboard row.
